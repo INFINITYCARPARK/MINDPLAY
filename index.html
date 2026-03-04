@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindPlay | Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* (Same styles as before) */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+        body { background:#0a0a0a; color:#fff; line-height:1.6; overflow-x:hidden; }
+        ::-webkit-scrollbar { width:8px; } ::-webkit-scrollbar-track { background:#1a1a1a; } ::-webkit-scrollbar-thumb { background:#00ff9d; border-radius:10px; }
+        html { scroll-behavior:smooth; }
+        :root { --bg-dark:#0a0a0a; --bg-card:#1a1a1a; --neon-green:#00ff9d; --neon-magenta:#ff00ff; --text-light:#fff; --text-dim:#b0b0b0; }
+        .navbar { position:fixed; top:0; width:100%; display:flex; justify-content:space-between; align-items:center; padding:1rem 5%; background:rgba(10,10,10,0.85); backdrop-filter:blur(10px); border-bottom:1px solid rgba(0,255,157,0.3); z-index:1000; transition:0.3s; }
+        .navbar.scrolled { padding:0.7rem 5%; background:rgba(10,10,10,0.95); box-shadow:0 5px 20px rgba(0,255,157,0.2); }
+        .logo { font-size:1.8rem; font-weight:700; color:var(--neon-green); text-shadow:0 0 10px rgba(0,255,157,0.5); }
+        .nav-links { display:flex; gap:2rem; }
+        .nav-links a { color:var(--text-light); text-decoration:none; font-weight:500; transition:0.3s; position:relative; }
+        .nav-links a::after { content:''; position:absolute; bottom:-5px; left:0; width:0%; height:2px; background:var(--neon-green); transition:width 0.3s; box-shadow:0 0 8px var(--neon-green); }
+        .nav-links a:hover { color:var(--neon-green); } .nav-links a:hover::after { width:100%; }
+        .hero { min-height:100vh; display:flex; align-items:center; padding:6rem 5% 4rem; position:relative; overflow:hidden; }
+        .hero::before { content:''; position:absolute; top:-30%; right:-10%; width:600px; height:600px; background:radial-gradient(circle, rgba(0,255,157,0.15) 0%, transparent 70%); border-radius:50%; z-index:0; animation:glowPulse 8s infinite alternate; }
+        @keyframes glowPulse { 0%{opacity:0.5;transform:scale(1);} 100%{opacity:1;transform:scale(1.2);} }
+        .hero-content { flex:1; z-index:2; max-width:700px; }
+        .hero-content h1 { font-size:3.5rem; font-weight:700; line-height:1.2; margin-bottom:1rem; }
+        .hero-content h1 .name { color:var(--neon-green); text-shadow:0 0 15px rgba(0,255,157,0.7); display:inline-block; animation:flicker 3s infinite; }
+        @keyframes flicker { 0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;} 20%,24%,55%{opacity:0.3;} }
+        .hero-content .tagline { font-size:1.2rem; color:var(--text-dim); margin-bottom:1rem; }
+        .hero-content .info-row { display:flex; flex-wrap:wrap; gap:2rem; margin:1.5rem 0; background:rgba(255,255,255,0.03); padding:1rem 1.5rem; border-radius:50px; border:1px solid rgba(0,255,157,0.2); backdrop-filter:blur(4px); }
+        .info-item { display:flex; align-items:center; gap:0.5rem; color:var(--text-light); }
+        .info-item i { color:var(--neon-green); font-size:1.2rem; }
+        .cta-buttons { display:flex; gap:1.5rem; flex-wrap:wrap; }
+        .btn { padding:0.8rem 2rem; border-radius:50px; text-decoration:none; font-weight:600; transition:0.3s; border:none; cursor:pointer; font-size:1rem; }
+        .btn-primary { background:var(--neon-green); color:#0a0a0a; box-shadow:0 0 20px rgba(0,255,157,0.5); }
+        .btn-primary:hover { background:transparent; color:var(--neon-green); box-shadow:0 0 30px rgba(0,255,157,0.8), inset 0 0 10px rgba(0,255,157,0.3); transform:translateY(-3px); }
+        .btn-outline { border:2px solid var(--neon-green); color:var(--neon-green); background:transparent; }
+        .btn-outline:hover { background:var(--neon-green); color:#0a0a0a; box-shadow:0 0 30px rgba(0,255,157,0.8); transform:translateY(-3px); }
+        .hero-graphic { flex:1; display:flex; justify-content:center; align-items:center; z-index:2; }
+        .hero-graphic i { font-size:15rem; color:var(--neon-green); filter:drop-shadow(0 0 30px rgba(0,255,157,0.8)); animation:float 6s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-20px) rotate(5deg);} }
+        section { padding:5rem 5%; }
+        .section-title { text-align:center; font-size:2.5rem; margin-bottom:3rem; position:relative; display:inline-block; left:50%; transform:translateX(-50%); }
+        .section-title::after { content:''; position:absolute; bottom:-10px; left:0; width:100%; height:3px; background:linear-gradient(90deg, transparent, var(--neon-green), transparent); }
+        
+        /* Search Bar */
+        .search-container { max-width:600px; margin:2rem auto; display:flex; gap:1rem; }
+        .search-input { flex:1; padding:1rem; background:rgba(255,255,255,0.05); border:1px solid rgba(0,255,157,0.3); border-radius:10px; color:#fff; font-size:1rem; }
+        .search-input:focus { outline:none; border-color:var(--neon-green); box-shadow:0 0 20px rgba(0,255,157,0.3); }
+        .search-btn { padding:1rem 2rem; background:var(--neon-green); color:#0a0a0a; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:0.3s; }
+        .search-btn:hover { background:transparent; color:var(--neon-green); box-shadow:0 0 30px rgba(0,255,157,0.5); }
+        
+        .projects-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:2rem; margin-top:2rem; }
+        .project-card { background:var(--bg-card); border-radius:20px; overflow:hidden; border:1px solid rgba(0,255,157,0.2); transition:0.3s; backdrop-filter:blur(5px); box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+        .project-card:hover { transform:translateY(-10px); border-color:var(--neon-green); box-shadow:0 20px 40px rgba(0,255,157,0.2), 0 0 0 2px rgba(0,255,157,0.1); }
+        .project-img { height:180px; background:linear-gradient(145deg,#2a2a2a,#1a1a1a); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .project-img img { width:100%; height:100%; object-fit:cover; }
+        .project-img i { font-size:4rem; color:var(--neon-green); opacity:0.8; }
+        .project-info { padding:1.5rem; }
+        .project-info h3 { font-size:1.4rem; margin-bottom:0.5rem; color:var(--neon-green); }
+        .project-info p { color:var(--text-dim); margin-bottom:1rem; font-size:0.95rem; }
+        .tech-tags { display:flex; flex-wrap:wrap; gap:0.5rem; margin:0.5rem 0; }
+        .tech-tags span { background:rgba(0,255,157,0.1); border:1px solid rgba(0,255,157,0.3); color:var(--neon-green); padding:0.3rem 0.8rem; border-radius:50px; font-size:0.8rem; font-weight:500; }
+        .project-links { display:flex; gap:1rem; margin-top:1rem; }
+        .project-links a { color:var(--neon-green); font-size:1.2rem; transition:0.3s; }
+        .project-links a:hover { color:var(--neon-magenta); transform:scale(1.2); }
+        .skills-container { display:flex; flex-wrap:wrap; justify-content:center; gap:2rem; max-width:900px; margin:0 auto; }
+        .skill-item { display:flex; flex-direction:column; align-items:center; width:100px; }
+        .skill-circle { width:80px; height:80px; border-radius:50%; background:var(--bg-card); display:flex; align-items:center; justify-content:center; margin-bottom:0.8rem; border:2px solid rgba(0,255,157,0.3); box-shadow:0 0 20px rgba(0,255,157,0.2); transition:0.3s; }
+        .skill-item:hover .skill-circle { border-color:var(--neon-green); box-shadow:0 0 30px var(--neon-green); transform:scale(1.05); }
+        .skill-circle i { font-size:2.5rem; color:var(--neon-green); }
+        .skill-item span { font-weight:500; color:var(--text-dim); text-align:center; }
+        .contact-container { display:flex; flex-wrap:wrap; gap:3rem; background:var(--bg-card); border-radius:30px; padding:2.5rem; border:1px solid rgba(0,255,157,0.2); box-shadow:0 20px 40px rgba(0,0,0,0.5); }
+        .contact-info { flex:1; min-width:250px; }
+        .contact-info h3 { font-size:2rem; margin-bottom:1.5rem; color:var(--neon-green); }
+        .contact-info p { color:var(--text-dim); margin-bottom:2rem; }
+        .social-links { display:flex; gap:1.2rem; margin-top:2rem; }
+        .social-links a { color:var(--text-light); font-size:1.8rem; transition:0.3s; }
+        .social-links a:hover { color:var(--neon-green); transform:translateY(-5px); filter:drop-shadow(0 0 10px var(--neon-green)); }
+        .contact-form { flex:2; min-width:280px; }
+        .form-group { margin-bottom:1.2rem; }
+        .form-group input, .form-group textarea { width:100%; padding:0.9rem; background:rgba(255,255,255,0.05); border:1px solid rgba(0,255,157,0.2); border-radius:10px; color:#fff; }
+        .form-group input:focus, .form-group textarea:focus { outline:none; border-color:var(--neon-green); box-shadow:0 0 15px rgba(0,255,157,0.3); }
+        .submit-btn { background:var(--neon-green); color:#0a0a0a; border:none; padding:0.9rem 2rem; border-radius:50px; font-weight:600; font-size:1rem; cursor:pointer; transition:0.3s; box-shadow:0 0 20px rgba(0,255,157,0.3); }
+        .submit-btn:hover { background:transparent; color:var(--neon-green); box-shadow:0 0 30px rgba(0,255,157,0.6); }
+        footer { text-align:center; padding:2rem; border-top:1px solid rgba(0,255,157,0.2); color:var(--text-dim); font-size:0.9rem; }
+        .no-projects { text-align:center; color:var(--text-dim); font-size:1.2rem; padding:3rem; grid-column:1/-1; }
+        @media (max-width:992px) { .hero{flex-direction:column;text-align:center;padding-top:8rem;} .hero-content h1{font-size:2.8rem;} .hero-graphic i{font-size:12rem;margin-top:2rem;} .cta-buttons{justify-content:center;} .info-row{justify-content:center;} }
+        @media (max-width:768px) { .navbar{padding:0.8rem 4%;} .nav-links{gap:1.2rem;} .logo{font-size:1.5rem;} .section-title{font-size:2.2rem;} .hero-content h1{font-size:2.2rem;} .info-row{flex-direction:column;align-items:center;gap:0.8rem;border-radius:30px;} }
+        @media (max-width:576px) { .nav-links{gap:0.8rem;} .nav-links a{font-size:0.9rem;} .hero-content h1{font-size:1.8rem;} .hero-graphic i{font-size:8rem;} .btn{padding:0.6rem 1.5rem;font-size:0.9rem;} .contact-container{padding:1.5rem;} }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="logo">MindPlay</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#projects">Projects</a>
+            <a href="#skills">Skills</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content" id="heroContent"></div>
+        <div class="hero-graphic"><i class="fas fa-robot"></i></div>
+    </section>
+
+    <section id="projects">
+        <h2 class="section-title">My Robotics Projects</h2>
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" class="search-input" id="projectSearch" placeholder="Search projects by title, description, or tags..." onkeyup="filterProjects()">
+            <button class="search-btn" onclick="filterProjects()"><i class="fas fa-search"></i> Search</button>
+        </div>
+        <div class="projects-grid" id="projectsContainer"></div>
+    </section>
+
+    <section id="skills">
+        <h2 class="section-title">Skills I'm Developing</h2>
+        <div class="skills-container" id="skillsContainer"></div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title">Get In Touch</h2>
+        <div class="contact-container">
+            <div class="contact-info">
+                <h3>Let's connect</h3>
+                <p>I'm always excited to discuss robotics, learning, or collaboration. Feel free to reach out!</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="contact-form">
+                <form id="contactForm">
+                    <div class="form-group"><input type="text" placeholder="Your Name" required></div>
+                    <div class="form-group"><input type="email" placeholder="Your Email" required></div>
+                    <div class="form-group"><textarea placeholder="Your Message" required></textarea></div>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer id="footerText"></footer>
+
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Contact form demo
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thanks for your message, ' + this.querySelector('input[type="text"]').value + '! (Demo)');
+            this.reset();
+        });
+
+        // Load profile
+        function loadProfile() {
+            const profile = JSON.parse(localStorage.getItem('mindplay_profile')) || {
+                name: 'Tejinder Singh Gill',
+                shortName: 'GT',
+                center: 'Hilax Computer Centre',
+                location: 'Punjab, India'
+            };
+            document.getElementById('heroContent').innerHTML = `
+                <h1>Hi, I'm <span class="name">${profile.name}</span> (${profile.shortName})</h1>
+                <p class="tagline">Aspiring Robotics Engineer | Learning at ${profile.center}</p>
+                <div class="info-row">
+                    <div class="info-item"><i class="fas fa-laptop-code"></i> <span>${profile.center}</span></div>
+                    <div class="info-item"><i class="fas fa-map-marker-alt"></i> <span>${profile.location}</span></div>
+                    <div class="info-item"><i class="fas fa-brain"></i> <span>MindPlay</span></div>
+                </div>
+                <p class="tagline" style="margin:1.5rem 0;">Building robots, one line of code at a time. Explore my learning journey and projects.</p>
+                <div class="cta-buttons">
+                    <a href="#projects" class="btn btn-primary">View Projects</a>
+                    <a href="#contact" class="btn btn-outline">Contact Me</a>
+                </div>
+            `;
+            document.getElementById('footerText').innerHTML = `© 2025 ${profile.name} (${profile.shortName}) | Learning at ${profile.center} | MindPlay`;
+        }
+
+        // Load skills
+        const defaultSkills = [
+            { name: 'Arduino', icon: 'fa-microchip' },
+            { name: 'Robotics', icon: 'fa-robot' },
+            { name: 'Python', icon: 'fa-python' },
+            { name: 'C/C++', icon: 'fa-code' },
+            { name: '3D Design', icon: 'fa-drafting-compass' },
+            { name: 'Circuits', icon: 'fa-bolt' }
+        ];
+
+        function loadSkills() {
+            let skills = JSON.parse(localStorage.getItem('mindplay_skills'));
+            if (!skills || skills.length === 0) skills = defaultSkills;
+            const container = document.getElementById('skillsContainer');
+            let html = '';
+            skills.forEach(s => {
+                html += `<div class="skill-item"><div class="skill-circle"><i class="fas ${s.icon}"></i></div><span>${s.name}</span></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // Load and filter projects
+        let allProjects = [];
+
+        function loadProjects() {
+            allProjects = JSON.parse(localStorage.getItem('mindplay_projects')) || [];
+            renderProjects(allProjects);
+        }
+
+        function renderProjects(projects) {
+            const container = document.getElementById('projectsContainer');
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="no-projects">No projects found.</div>';
+                return;
+            }
+            let html = '';
+            projects.forEach(p => {
+                const img = p.image ? `<img src="${p.image}" alt="${p.title}">` : '<i class="fas fa-robot"></i>';
+                const tags = p.tags ? p.tags.split(',').map(t => `<span>${t.trim()}</span>`).join('') : '';
+                const links = `<div class="project-links">${p.video ? `<a href="${p.video}" target="_blank"><i class="fas fa-video"></i></a>` : ''}${p.code ? `<a href="${p.code}" target="_blank"><i class="fas fa-code"></i></a>` : ''}</div>`;
+                html += `
+                    <div class="project-card">
+                        <div class="project-img">${img}</div>
+                        <div class="project-info">
+                            <h3>${p.title}</h3>
+                            <p>${p.description}</p>
+                            <div class="tech-tags">${tags}</div>
+                            ${links}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterProjects() {
+            const term = document.getElementById('projectSearch').value.toLowerCase();
+            if (!term) {
+                renderProjects(allProjects);
+                return;
+            }
+            const filtered = allProjects.filter(p => 
+                p.title.toLowerCase().includes(term) ||
+                p.description.toLowerCase().includes(term) ||
+                (p.tags && p.tags.toLowerCase().includes(term))
+            );
+            renderProjects(filtered);
+        }
+
+        // Load all data
+        function loadAll() {
+            loadProfile();
+            loadSkills();
+            loadProjects();
+        }
+
+        window.addEventListener('load', loadAll);
+        window.addEventListener('focus', loadAll);
+    </script>
+</body>
+</html>
