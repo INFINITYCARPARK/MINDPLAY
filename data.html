@@ -27,17 +27,243 @@
         const db = firebase.database();
     </script>
     <style>
-        /* (same as before – paste your full CSS here) */
+        /* ---------- PURE BLACK THEME ---------- */
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
         body { background:#000; color:#fff; line-height:1.6; min-height:100vh; }
-        :root { /* ... your variables ... */ }
-        .login-overlay { /* ... */ }
-        .login-box { /* ... */ }
-        /* ... all existing styles ... */
+        :root {
+            --bg-black:#000;
+            --bg-dark:#0a0a0a;
+            --bg-card:#111;
+            --border-dim:#333;
+            --text-light:#fff;
+            --text-dim:#aaa;
+            --accent:#fff;
+            --accent-dim:#444;
+            --delete:#cc3333;
+            --delete-dim:#992222;
+            --spacing-sm:clamp(0.5rem,2vw,1rem);
+            --spacing-md:clamp(1rem,4vw,2rem);
+            --spacing-lg:clamp(2rem,6vw,4rem);
+            --border-radius:20px;
+            --transition:all 0.3s ease;
+        }
+
+        .login-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.95); backdrop-filter:blur(10px); z-index:9999;
+            display:flex; justify-content:center; align-items:center;
+            transition:opacity 0.5s;
+        }
+        .login-box {
+            background:var(--bg-card); padding:var(--spacing-lg); border-radius:var(--border-radius);
+            border:1px solid #444; box-shadow:0 0 50px rgba(255,255,255,0.05);
+            width:90%; max-width:400px; animation:glowPulse 3s infinite alternate;
+        }
+        @keyframes glowPulse {
+            0% { box-shadow:0 0 20px rgba(255,255,255,0.02); }
+            100% { box-shadow:0 0 40px rgba(255,255,255,0.08); }
+        }
+        .login-box h2 { color:var(--text-light); text-align:center; margin-bottom:var(--spacing-md); font-size:clamp(1.5rem,6vw,2rem); font-weight:500; }
+        .login-box input[type="email"],
+        .login-box input[type="password"] {
+            width:100%; padding:0.9rem; margin-bottom:1rem; background:#1a1a1a;
+            border:1px solid #444; border-radius:10px; color:#fff; font-size:1rem; transition:var(--transition);
+        }
+        .login-box input:focus { outline:none; border-color:#fff; background:#222; }
+        .checkbox-container {
+            display:flex; align-items:center; gap:0.5rem; margin:1rem 0;
+            color:var(--text-dim); font-size:var(--font-size-base); flex-wrap:wrap;
+        }
+        .checkbox-container input { width:auto; accent-color:#fff; }
+        .login-btn {
+            width:100%; padding:1rem; background:transparent; color:var(--text-light);
+            border:1px solid #666; border-radius:10px; font-weight:600; cursor:pointer;
+            transition:var(--transition); margin-top:0.5rem; font-size:1.1rem;
+        }
+        .login-btn:hover { background:#fff; color:#000; border-color:#fff; }
+        .login-btn:disabled { opacity:0.4; cursor:not-allowed; border-color:#444; }
+        .error-msg { color:#cc3333; text-align:center; margin:0.5rem 0; min-height:2rem; font-size:0.9rem; }
+        .security-note { font-size:0.7rem; color:#666; text-align:center; margin-top:1rem; }
+        .security-note i { margin-right:0.3rem; }
+
+        .admin-panel { display:none; }
+        .admin-header {
+            background:#0a0a0a; padding:var(--spacing-sm) 5%; border-bottom:1px solid #333;
+            position:sticky; top:0; z-index:100; backdrop-filter:blur(10px);
+        }
+        .header-content { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+        .logo { font-size:clamp(1.5rem,5vw,2rem); font-weight:600; color:var(--text-light); }
+        .session-info { display:flex; align-items:center; gap:1rem; color:#aaa; font-size:0.9rem; flex-wrap:wrap; }
+        .logout-btn {
+            background:transparent; border:1px solid #666; color:#ccc; padding:0.5rem 1.5rem;
+            border-radius:50px; cursor:pointer; transition:var(--transition); font-size:0.9rem;
+        }
+        .logout-btn:hover { background:#fff; color:#000; border-color:#fff; }
+
+        .admin-container { padding:var(--spacing-md) 5%; max-width:1400px; margin:0 auto; }
+
+        .stats-grid {
+            display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+            gap:var(--spacing-sm); margin-bottom:var(--spacing-md);
+        }
+        .stat-card {
+            background:var(--bg-card); padding:var(--spacing-md); border-radius:var(--border-radius);
+            border:1px solid #333; display:flex; align-items:center; gap:1rem; transition:var(--transition);
+        }
+        .stat-card:hover { border-color:#666; transform:translateY(-3px); background:#151515; }
+        .stat-icon { font-size:2.5rem; color:#ccc; }
+        .stat-info h3 { font-size:0.9rem; color:#aaa; }
+        .stat-info p { font-size:2rem; font-weight:600; color:#fff; }
+
+        .tabs {
+            display:flex; gap:0.5rem; margin-bottom:var(--spacing-md);
+            flex-wrap:wrap; justify-content:center;
+        }
+        .tab {
+            padding:0.8rem 1.5rem; background:transparent; border:1px solid #444;
+            color:#aaa; border-radius:50px; cursor:pointer; transition:var(--transition);
+            font-size:0.9rem; white-space:nowrap;
+        }
+        .tab.active { background:#fff; color:#000; border-color:#fff; }
+        .tab:hover { border-color:#fff; color:#fff; }
+
+        .content-panel {
+            display:none; background:#0c0c0c; border-radius:var(--border-radius);
+            padding:var(--spacing-md); border:1px solid #333;
+        }
+        .content-panel.active { display:block; }
+
+        .form-grid {
+            display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+            gap:var(--spacing-md);
+        }
+        .form-group { margin-bottom:1.5rem; }
+        .form-group label { display:block; margin-bottom:0.5rem; color:#ccc; font-weight:500; }
+        .form-group input, .form-group textarea, .form-group select {
+            width:100%; padding:0.9rem; background:#1a1a1a; border:1px solid #444;
+            border-radius:10px; color:#fff; transition:var(--transition); font-size:1rem;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline:none; border-color:#fff; background:#222;
+        }
+        .form-group textarea { resize:vertical; min-height:100px; }
+
+        .array-field { background:#1a1a1a; border:1px solid #333; border-radius:10px; padding:1rem; margin-bottom:1rem; }
+        .array-item { display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center; }
+        .array-item input, .array-item textarea { flex:1; background:#111; border:1px solid #444; border-radius:5px; padding:0.5rem; color:#fff; }
+        .remove-item { color:#cc3333; cursor:pointer; font-size:1.2rem; }
+        .add-item {
+            background:transparent; border:1px solid #666; color:#fff; padding:0.3rem 1rem;
+            border-radius:5px; cursor:pointer; margin-top:0.5rem;
+        }
+        .add-item:hover { background:#333; }
+
+        .projects-list {
+            display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+            gap:var(--spacing-md); margin-top:var(--spacing-md);
+        }
+        .project-admin-card {
+            background:#111; border-radius:15px; overflow:hidden; border:1px solid #333;
+            transition:var(--transition); display:flex; flex-direction:column;
+        }
+        .project-admin-card:hover { border-color:#cc3333; transform:translateY(-3px); }
+        .project-admin-img { height:150px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .project-admin-img img { width:100%; height:100%; object-fit:cover; }
+        .project-admin-img i { font-size:3rem; color:#666; }
+        .project-admin-info { padding:1rem; flex:1; }
+        .project-admin-info h4 { color:#fff; margin-bottom:0.3rem; font-size:1.1rem; word-wrap:break-word; }
+        .project-admin-info p { color:#aaa; font-size:0.85rem; margin-bottom:0.5rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .project-admin-tags { display:flex; flex-wrap:wrap; gap:0.3rem; margin:0.5rem 0; }
+        .project-admin-tags span { background:#1a1a1a; border:1px solid #444; color:#ccc; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem; }
+        .project-admin-actions { display:flex; gap:0.5rem; margin-top:0.8rem; }
+        .delete-btn {
+            flex:1; padding:0.5rem; background:transparent; border:1px solid #992222;
+            color:#cc3333; border-radius:5px; cursor:pointer; transition:var(--transition); font-size:0.9rem;
+        }
+        .delete-btn:hover { background:#992222; color:#fff; border-color:#992222; }
+
+        .skills-grid {
+            display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));
+            gap:1rem; margin:1.5rem 0;
+        }
+        .skill-admin-card {
+            background:#111; border:1px solid #333; border-radius:10px; padding:1rem;
+            display:flex; align-items:center; gap:0.8rem; transition:var(--transition);
+        }
+        .skill-admin-card:hover { border-color:#cc3333; }
+        .skill-admin-card i { font-size:1.5rem; color:#ccc; }
+        .skill-admin-card span { flex:1; color:#aaa; word-wrap:break-word; }
+        .delete-skill { color:#cc3333; cursor:pointer; transition:var(--transition); }
+        .delete-skill:hover { transform:scale(1.2); color:#ff5555; }
+
+        .add-skill {
+            display:flex; gap:0.5rem; margin-top:1rem; flex-wrap:wrap;
+        }
+        .add-skill input {
+            flex:1 1 200px; padding:0.8rem; background:#1a1a1a; border:1px solid #444; border-radius:10px; color:#fff;
+        }
+        .add-skill input:focus { outline:none; border-color:#fff; }
+        .add-skill button {
+            padding:0.8rem 2rem; background:transparent; color:#fff; border:1px solid #666;
+            border-radius:10px; font-weight:600; cursor:pointer; transition:var(--transition);
+        }
+        .add-skill button:hover { background:#fff; color:#000; border-color:#fff; }
+
+        .components-grid, .circuits-grid {
+            display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+            gap:var(--spacing-md); margin-top:var(--spacing-md);
+        }
+        .component-card, .circuit-card {
+            background:#111; border-radius:15px; overflow:hidden; border:1px solid #333;
+            transition:var(--transition); display:flex; flex-direction:column;
+        }
+        .component-card:hover, .circuit-card:hover { border-color:#cc3333; transform:translateY(-3px); }
+        .component-img, .circuit-img { height:150px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .component-img img, .circuit-img img { width:100%; height:100%; object-fit:cover; }
+        .component-img i, .circuit-img i { font-size:3rem; color:#666; }
+        .component-info, .circuit-info { padding:1rem; flex:1; }
+        .component-info h4, .circuit-info h4 { color:#fff; margin-bottom:0.3rem; font-size:1.1rem; }
+        .component-info p, .circuit-info p { color:#aaa; font-size:0.85rem; margin-bottom:0.5rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .component-tags, .circuit-tags { display:flex; flex-wrap:wrap; gap:0.3rem; margin:0.5rem 0; }
+        .component-tags span, .circuit-tags span { background:#1a1a1a; border:1px solid #444; color:#ccc; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem; }
+        .component-actions, .circuit-actions { display:flex; gap:0.5rem; margin-top:0.8rem; }
+
+        .profile-settings { max-width:600px; }
+        .profile-preview {
+            width:150px; height:150px; border-radius:50%; background:#1a1a1a;
+            border:2px solid #666; margin:1rem 0; overflow:hidden;
+        }
+        .profile-preview img { width:100%; height:100%; object-fit:cover; }
+
+        .danger-zone {
+            margin-top:2rem; padding:1.5rem; border:1px solid #992222; border-radius:10px; background:#1a1a1a;
+        }
+        .danger-zone h3 { color:#cc3333; margin-bottom:1rem; }
+        .danger-btn {
+            background:transparent; border:1px solid #cc3333; color:#cc3333; padding:0.5rem 1.5rem;
+            border-radius:5px; cursor:pointer; transition:var(--transition);
+        }
+        .danger-btn:hover { background:#cc3333; color:#fff; }
+
+        .admin-footer { text-align:center; padding:var(--spacing-md); border-top:1px solid #333; color:#666; margin-top:var(--spacing-md); }
+
+        @media (max-width:768px) {
+            .header-content { flex-direction:column; text-align:center; }
+            .tabs { justify-content:center; }
+            .stats-grid { grid-template-columns:1fr; }
+            .stat-card { padding:1rem; }
+            .stat-icon { font-size:2rem; }
+            .stat-info p { font-size:1.5rem; }
+        }
+        @media (max-width:480px) {
+            .login-box { padding:1.5rem; }
+            .tab { padding:0.6rem 1rem; font-size:0.8rem; }
+            .form-grid { grid-template-columns:1fr; }
+        }
     </style>
 </head>
 <body>
-    <!-- Login Overlay (modified for email/password) -->
+    <!-- Login Overlay -->
     <div class="login-overlay" id="loginOverlay">
         <div class="login-box">
             <h2><i class="fas fa-lock"></i> Admin Login</h2>
@@ -55,7 +281,7 @@
     </div>
 
     <!-- Admin Panel -->
-    <div class="admin-panel" id="adminPanel" style="display:none;">
+    <div class="admin-panel" id="adminPanel">
         <header class="admin-header">
             <div class="header-content">
                 <div class="logo">MindPlay Admin</div>
@@ -65,27 +291,187 @@
                 </div>
             </div>
         </header>
-        <!-- Rest of admin panel (tabs, forms, lists) exactly as before -->
-        <!-- I'm not repeating all HTML here to keep answer concise, but you must copy the entire admin panel structure from the previous `data.html` (the one with Firebase database) and paste it here, between the header and footer. -->
-        <!-- Make sure to include all panels: projects, skills, components, circuits etc. -->
+
+        <div class="admin-container">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fas fa-robot stat-icon"></i><div class="stat-info"><h3>Total Projects</h3><p id="totalProjects">0</p></div></div>
+                <div class="stat-card"><i class="fas fa-tags stat-icon"></i><div class="stat-info"><h3>Skills</h3><p id="totalSkills">0</p></div></div>
+                <div class="stat-card"><i class="fas fa-envelope stat-icon"></i><div class="stat-info"><h3>Messages</h3><p id="totalMessages">0</p></div></div>
+                <div class="stat-card"><i class="fas fa-users stat-icon"></i><div class="stat-info"><h3>Visitors</h3><p id="totalVisitors">0</p></div></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('projects')">Projects</div>
+                <div class="tab" onclick="switchTab('skills')">Skills</div>
+                <div class="tab" onclick="switchTab('messages')">Messages</div>
+                <div class="tab" onclick="switchTab('profile')">Profile</div>
+                <div class="tab" onclick="switchTab('settings')">Settings</div>
+                <div class="tab" onclick="switchTab('components')">Components</div>
+                <div class="tab" onclick="switchTab('circuits')">Circuits</div>
+            </div>
+
+            <!-- Projects Panel -->
+            <div id="projectsPanel" class="content-panel active">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                    <h2 style="color:#fff;">Manage Projects</h2>
+                    <button class="login-btn" style="width:auto;" onclick="showAddProjectForm()">+ Add Project</button>
+                </div>
+                <div id="projectForm" style="display:none; background:#111; padding:1.5rem; border-radius:15px; margin-bottom:2rem; border:1px solid #333;">
+                    <h3 style="color:#fff; margin-bottom:1rem;" id="formTitle">Add New Project</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Project Title</label><input type="text" id="projectTitle"></div>
+                        <div class="form-group"><label>Icon (Font Awesome class)</label><input type="text" id="projectIcon" value="fa-robot"></div>
+                        <div class="form-group"><label>Description</label><textarea id="projectDesc"></textarea></div>
+                        <div class="form-group"><label>Technologies (comma separated)</label><input type="text" id="projectTech"></div>
+                        <div class="form-group"><label>GitHub URL</label><input type="url" id="projectGithub"></div>
+                        <div class="form-group"><label>Live Demo URL</label><input type="url" id="projectLink"></div>
+                        <div class="form-group"><label>Video URL (YouTube embed)</label><input type="url" id="projectVideo"></div>
+                    </div>
+                    <div class="form-group"><label>Image URLs</label><div id="imagesContainer" class="array-field"></div><button type="button" class="add-item" onclick="addImage()">+ Add Image URL</button></div>
+                    <div class="form-group"><label>Code Files</label><div id="codeFilesContainer" class="array-field"></div><button type="button" class="add-item" onclick="addCodeFile()">+ Add Code File</button></div>
+                    <div class="form-group"><label>Components</label><div id="componentsContainer" class="array-field"></div><button type="button" class="add-item" onclick="addComponent()">+ Add Component</button></div>
+                    <div class="form-group"><label>Build Steps</label><div id="stepsContainer" class="array-field"></div><button type="button" class="add-item" onclick="addBuildStep()">+ Add Step</button></div>
+                    <div style="display:flex; gap:1rem; margin-top:1rem;">
+                        <button class="login-btn" onclick="saveProject()">Save Project</button>
+                        <button class="logout-btn" style="border-color:#666; color:#ccc;" onclick="cancelProjectForm()">Cancel</button>
+                    </div>
+                </div>
+                <div id="projectsList" class="projects-list"></div>
+            </div>
+
+            <!-- Skills Panel -->
+            <div id="skillsPanel" class="content-panel">
+                <h2 style="color:#fff; margin-bottom:1rem;">Manage Skills</h2>
+                <div class="skills-grid" id="skillsGrid"></div>
+                <div class="add-skill">
+                    <input type="text" id="newSkillName" placeholder="Skill name">
+                    <input type="text" id="newSkillIcon" placeholder="Icon class (e.g., fab fa-arduino)">
+                    <button onclick="addSkill()">Add Skill</button>
+                </div>
+            </div>
+
+            <!-- Messages Panel (placeholder) -->
+            <div id="messagesPanel" class="content-panel">
+                <h2 style="color:#fff; margin-bottom:1rem;">Contact Messages</h2>
+                <div style="background:#111; border-radius:10px; padding:1rem; min-height:200px; color:#666; text-align:center;">No messages yet.</div>
+            </div>
+
+            <!-- Profile Panel -->
+            <div id="profilePanel" class="content-panel">
+                <h2 style="color:#fff; margin-bottom:1rem;">Profile Settings</h2>
+                <div class="profile-settings">
+                    <div class="form-group"><label>Display Name</label><input type="text" id="profileName" value="Tejinder Singh Gill"></div>
+                    <div class="form-group"><label>Tagline</label><input type="text" id="profileTagline" value="Robotics enthusiast | Arduino tinkerer"></div>
+                    <div class="form-group"><label>Location</label><input type="text" id="profileLocation" value="Hilax Computer Centre, Punjab"></div>
+                    <div class="form-group"><label>Profile Image</label><div class="profile-preview" id="profilePreview"><img src="" alt="Profile" style="display:none;"></div><input type="file" id="profileImage" accept="image/*"></div>
+                    <button class="login-btn" style="width:auto;" onclick="saveProfile()">Save Profile</button>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div id="settingsPanel" class="content-panel">
+                <h2 style="color:#fff; margin-bottom:1rem;">Admin Settings</h2>
+                <div style="max-width:500px;">
+                    <div class="form-group"><label>Current Password</label><input type="password" id="currentPwd"></div>
+                    <div class="form-group"><label>New Password</label><input type="password" id="newPwd"></div>
+                    <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPwd"></div>
+                    <button class="login-btn" onclick="changePassword()">Change Password</button>
+                </div>
+                <div class="danger-zone">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                    <p style="color:#aaa; margin-bottom:1rem;">These actions are irreversible.</p>
+                    <button class="danger-btn" onclick="deleteAllProjects()">Delete All Projects</button>
+                </div>
+            </div>
+
+            <!-- COMPONENTS PANEL -->
+            <div id="componentsPanel" class="content-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                    <h2 style="color:#fff;">Manage Components</h2>
+                    <button class="login-btn" style="width:auto;" onclick="showAddComponentForm()">+ Add Component</button>
+                </div>
+                <div id="componentForm" style="display:none; background:#111; padding:1.5rem; border-radius:15px; margin-bottom:2rem; border:1px solid #333;">
+                    <h3 style="color:#fff; margin-bottom:1rem;" id="componentFormTitle">Add New Component</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Component Name *</label><input type="text" id="componentName"></div>
+                        <div class="form-group"><label>Category</label><input type="text" id="componentCategory" placeholder="e.g. Sensor, Motor"></div>
+                        <div class="form-group"><label>Description</label><textarea id="componentDesc"></textarea></div>
+                        <div class="form-group"><label>Manufacturer</label><input type="text" id="componentManufacturer"></div>
+                        <div class="form-group"><label>Datasheet URL</label><input type="url" id="componentDatasheet"></div>
+                        <div class="form-group"><label>Pinout Image URL</label><input type="url" id="componentPinout"></div>
+                        <div class="form-group"><label>Specifications</label><textarea id="componentSpecs" placeholder="e.g. Voltage: 3.3V, Current: 20mA"></textarea></div>
+                        <div class="form-group"><label>Price (optional)</label><input type="text" id="componentPrice" placeholder="e.g. $2.50"></div>
+                        <div class="form-group"><label>Quantity in stock</label><input type="number" id="componentQuantity" value="0"></div>
+                        <div class="form-group"><label>Tags (comma separated)</label><input type="text" id="componentTags"></div>
+                        <div class="form-group"><label>Notes</label><textarea id="componentNotes"></textarea></div>
+                    </div>
+                    <div style="display:flex; gap:1rem; margin-top:1rem;">
+                        <button class="login-btn" onclick="saveComponent()">Save Component</button>
+                        <button class="logout-btn" style="border-color:#666; color:#ccc;" onclick="cancelComponentForm()">Cancel</button>
+                    </div>
+                </div>
+                <div id="componentsList" class="components-grid"></div>
+            </div>
+
+            <!-- CIRCUITS PANEL -->
+            <div id="circuitsPanel" class="content-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+                    <h2 style="color:#fff;">Manage Circuits</h2>
+                    <button class="login-btn" style="width:auto;" onclick="showAddCircuitForm()">+ Add Circuit</button>
+                </div>
+                <div id="circuitForm" style="display:none; background:#111; padding:1.5rem; border-radius:15px; margin-bottom:2rem; border:1px solid #333;">
+                    <h3 style="color:#fff; margin-bottom:1rem;" id="circuitFormTitle">Add New Circuit</h3>
+                    <div class="form-grid">
+                        <div class="form-group"><label>Circuit Name *</label><input type="text" id="circuitName"></div>
+                        <div class="form-group"><label>Description</label><textarea id="circuitDesc"></textarea></div>
+                        <div class="form-group"><label>Schematic Image URL</label><input type="url" id="circuitImage"></div>
+                        <div class="form-group"><label>Schematic PDF URL</label><input type="url" id="circuitPdf"></div>
+                        <div class="form-group"><label>Code URL</label><input type="url" id="circuitCode"></div>
+                        <div class="form-group"><label>Difficulty Level</label>
+                            <select id="circuitDifficulty">
+                                <option value="">Select</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Components Used (with quantity)</label>
+                        <div id="circuitComponentsContainer" class="array-field"></div>
+                        <button type="button" class="add-item" onclick="addCircuitComponent()">+ Add Component</button>
+                    </div>
+                    <div class="form-group"><label>Notes</label><textarea id="circuitNotes"></textarea></div>
+                    <div style="display:flex; gap:1rem; margin-top:1rem;">
+                        <button class="login-btn" onclick="saveCircuit()">Save Circuit</button>
+                        <button class="logout-btn" style="border-color:#666; color:#ccc;" onclick="cancelCircuitForm()">Cancel</button>
+                    </div>
+                </div>
+                <div id="circuitsList" class="circuits-grid"></div>
+            </div>
+        </div>
+
+        <footer class="admin-footer">
+            <p>© 2025 MindPlay Admin • Secure Firebase</p>
+        </footer>
     </div>
 
     <script>
-        // Check if user is already logged in (on page load)
+        // ---------- AUTH STATE ----------
         auth.onAuthStateChanged(user => {
             if (user) {
-                // User is signed in
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
                 document.getElementById('userEmail').innerText = user.email;
-                loadDashboardData(); // Load data from Firebase
+                loadDashboardData();  // Load all data
             } else {
                 document.getElementById('loginOverlay').style.display = 'flex';
                 document.getElementById('adminPanel').style.display = 'none';
             }
         });
 
-        // Login function
         function login() {
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passwordInput').value;
@@ -106,19 +492,493 @@
             });
         }
 
-        // Logout
         function logout() {
             auth.signOut();
         }
 
-        // ---------- FIREBASE DATA LOADING & MANAGEMENT (same as before) ----------
-        // Copy all the data functions from the previous Firebase version of data.html
-        // (projectsRef, skillsRef, componentsRef, circuitsRef, loadProjects, saveProject, etc.)
-        // They will work automatically because the user is authenticated.
-        // Remember to use db.ref(...) and auth.currentUser is automatically attached by rules.
-        // Paste all those functions here.
+        // ---------- FIREBASE REFERENCES ----------
+        const projectsRef = db.ref('projects');
+        const skillsRef = db.ref('skills');
+        const componentsRef = db.ref('components');
+        const circuitsRef = db.ref('circuits');
 
-        // For brevity, I'm not repeating them – but you must include them exactly as in the previous Firebase data.html.
+        // ---------- PROJECTS ----------
+        let projects = [];
+        let editingId = null;
+
+        function loadProjects() {
+            projectsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                projects = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
+                renderProjectsList();
+                document.getElementById('totalProjects').innerText = projects.length;
+            });
+        }
+
+        function renderProjectsList() {
+            const list = document.getElementById('projectsList');
+            if (projects.length === 0) {
+                list.innerHTML = '<p style="color:#666; text-align:center;">No projects yet. Add one!</p>';
+                return;
+            }
+            list.innerHTML = projects.map(p => `
+                <div class="project-admin-card">
+                    <div class="project-admin-img"><i class="fas ${p.icon}"></i></div>
+                    <div class="project-admin-info">
+                        <h4>${p.title}</h4>
+                        <p>${(p.description || '').substring(0,80)}...</p>
+                        <div class="project-admin-tags">${(p.tech || []).slice(0,3).map(t => `<span>${t}</span>`).join('')}</div>
+                        <div class="project-admin-actions">
+                            <button class="delete-btn" onclick="editProject('${p.firebaseKey}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="delete-btn" onclick="deleteProject('${p.firebaseKey}')"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddProjectForm() {
+            editingId = null;
+            document.getElementById('formTitle').innerText = 'Add New Project';
+            document.getElementById('projectTitle').value = '';
+            document.getElementById('projectIcon').value = 'fa-robot';
+            document.getElementById('projectDesc').value = '';
+            document.getElementById('projectTech').value = '';
+            document.getElementById('projectGithub').value = '';
+            document.getElementById('projectLink').value = '';
+            document.getElementById('projectVideo').value = '';
+            document.getElementById('imagesContainer').innerHTML = '';
+            document.getElementById('codeFilesContainer').innerHTML = '';
+            document.getElementById('componentsContainer').innerHTML = '';
+            document.getElementById('stepsContainer').innerHTML = '';
+            document.getElementById('projectForm').style.display = 'block';
+        }
+
+        function cancelProjectForm() { document.getElementById('projectForm').style.display = 'none'; }
+
+        function saveProject() {
+            const title = document.getElementById('projectTitle').value.trim();
+            if (!title) return alert('Title required');
+            const tech = document.getElementById('projectTech').value.split(',').map(t => t.trim()).filter(t => t);
+            const images = Array.from(document.querySelectorAll('#imagesContainer input')).map(inp => inp.value).filter(v => v);
+            const codeFiles = [];
+            document.querySelectorAll('#codeFilesContainer .array-item').forEach(item => {
+                const name = item.querySelector('input[placeholder*="File name"]')?.value;
+                const url = item.querySelector('input[placeholder*="URL"]')?.value;
+                if (name && url) codeFiles.push({ name, url });
+            });
+            const components = [];
+            document.querySelectorAll('#componentsContainer .array-item').forEach(item => {
+                const name = item.querySelector('input[placeholder*="Component name"]')?.value;
+                const desc = item.querySelector('input[placeholder*="Description"]')?.value;
+                if (name) components.push({ name, description: desc || '' });
+            });
+            const buildSteps = Array.from(document.querySelectorAll('#stepsContainer input')).map(inp => inp.value).filter(v => v);
+
+            const projectData = {
+                title: title,
+                description: document.getElementById('projectDesc').value.trim(),
+                tech: tech,
+                icon: document.getElementById('projectIcon').value.trim() || 'fa-robot',
+                github: document.getElementById('projectGithub').value.trim(),
+                link: document.getElementById('projectLink').value.trim(),
+                video: document.getElementById('projectVideo').value.trim(),
+                images: images,
+                codeFiles: codeFiles,
+                components: components,
+                buildSteps: buildSteps
+            };
+
+            if (editingId) {
+                projectsRef.child(editingId).update(projectData)
+                    .then(() => cancelProjectForm())
+                    .catch(err => alert('Error updating: ' + err));
+            } else {
+                projectsRef.push(projectData)
+                    .then(() => cancelProjectForm())
+                    .catch(err => alert('Error saving: ' + err));
+            }
+        }
+
+        function deleteProject(key) {
+            if (confirm('Delete this project?')) {
+                projectsRef.child(key).remove()
+                    .catch(err => alert('Error deleting: ' + err));
+            }
+        }
+
+        function editProject(key) {
+            const p = projects.find(p => p.firebaseKey === key);
+            if (!p) return;
+            editingId = key;
+            document.getElementById('formTitle').innerText = 'Edit Project';
+            document.getElementById('projectTitle').value = p.title || '';
+            document.getElementById('projectIcon').value = p.icon || '';
+            document.getElementById('projectDesc').value = p.description || '';
+            document.getElementById('projectTech').value = (p.tech || []).join(', ');
+            document.getElementById('projectGithub').value = p.github || '';
+            document.getElementById('projectLink').value = p.link || '';
+            document.getElementById('projectVideo').value = p.video || '';
+
+            document.getElementById('imagesContainer').innerHTML = (p.images || []).map(img => `
+                <div class="array-item"><input type="url" value="${img}" placeholder="Image URL"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i></div>
+            `).join('');
+            document.getElementById('codeFilesContainer').innerHTML = (p.codeFiles || []).map(f => `
+                <div class="array-item"><input type="text" value="${f.name}" placeholder="File name"><input type="url" value="${f.url}" placeholder="URL"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i></div>
+            `).join('');
+            document.getElementById('componentsContainer').innerHTML = (p.components || []).map(c => `
+                <div class="array-item"><input type="text" value="${c.name}" placeholder="Component name"><input type="text" value="${c.description}" placeholder="Description"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i></div>
+            `).join('');
+            document.getElementById('stepsContainer').innerHTML = (p.buildSteps || []).map(s => `
+                <div class="array-item"><input type="text" value="${s}" placeholder="Step description"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i></div>
+            `).join('');
+
+            document.getElementById('projectForm').style.display = 'block';
+        }
+
+        // Array field helpers
+        function addImage() {
+            const div = document.createElement('div'); div.className = 'array-item';
+            div.innerHTML = `<input type="url" placeholder="Image URL"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i>`;
+            document.getElementById('imagesContainer').appendChild(div);
+        }
+        function addCodeFile() {
+            const div = document.createElement('div'); div.className = 'array-item';
+            div.innerHTML = `<input type="text" placeholder="File name"><input type="url" placeholder="URL"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i>`;
+            document.getElementById('codeFilesContainer').appendChild(div);
+        }
+        function addComponent() {
+            const div = document.createElement('div'); div.className = 'array-item';
+            div.innerHTML = `<input type="text" placeholder="Component name"><input type="text" placeholder="Description"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i>`;
+            document.getElementById('componentsContainer').appendChild(div);
+        }
+        function addBuildStep() {
+            const div = document.createElement('div'); div.className = 'array-item';
+            div.innerHTML = `<input type="text" placeholder="Step description"><i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i>`;
+            document.getElementById('stepsContainer').appendChild(div);
+        }
+
+        function deleteAllProjects() {
+            if (confirm('⚠️ Delete ALL projects? This cannot be undone.')) {
+                projectsRef.remove().catch(err => alert(err));
+            }
+        }
+
+        // ---------- SKILLS ----------
+        let skills = [];
+        function loadSkills() {
+            skillsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                skills = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
+                renderSkills();
+                document.getElementById('totalSkills').innerText = skills.length;
+            });
+        }
+
+        function renderSkills() {
+            const grid = document.getElementById('skillsGrid');
+            grid.innerHTML = skills.map(s => `
+                <div class="skill-admin-card">
+                    <i class="${s.icon}"></i><span>${s.name}</span>
+                    <i class="fas fa-times delete-skill" onclick="deleteSkill('${s.firebaseKey}')"></i>
+                </div>
+            `).join('');
+        }
+
+        function deleteSkill(key) {
+            if (confirm('Delete this skill?')) {
+                skillsRef.child(key).remove();
+            }
+        }
+
+        function addSkill() {
+            const name = document.getElementById('newSkillName').value.trim();
+            const icon = document.getElementById('newSkillIcon').value.trim();
+            if (name && icon) {
+                skillsRef.push({ name, icon })
+                    .then(() => {
+                        document.getElementById('newSkillName').value = '';
+                        document.getElementById('newSkillIcon').value = '';
+                    });
+            }
+        }
+
+        // ---------- COMPONENTS ----------
+        let components = [];
+        let editingComponentKey = null;
+
+        function loadComponents() {
+            componentsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                components = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
+                renderComponentsList();
+            });
+        }
+
+        function renderComponentsList() {
+            const list = document.getElementById('componentsList');
+            if (components.length === 0) {
+                list.innerHTML = '<p style="color:#666; text-align:center;">No components yet. Add one!</p>';
+                return;
+            }
+            list.innerHTML = components.map(c => `
+                <div class="component-card">
+                    <div class="component-img">${c.image ? `<img src="${c.image}" alt="${c.name}">` : '<i class="fas fa-microchip"></i>'}</div>
+                    <div class="component-info">
+                        <h4>${c.name}</h4>
+                        <p>${(c.description || '').substring(0,80)}...</p>
+                        <div class="component-tags">${(c.tags || []).slice(0,3).map(t => `<span>${t}</span>`).join('')}</div>
+                        <div class="component-actions">
+                            <button class="delete-btn" onclick="editComponent('${c.firebaseKey}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="delete-btn" onclick="deleteComponent('${c.firebaseKey}')"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddComponentForm() {
+            editingComponentKey = null;
+            document.getElementById('componentFormTitle').innerText = 'Add New Component';
+            document.getElementById('componentName').value = '';
+            document.getElementById('componentCategory').value = '';
+            document.getElementById('componentDesc').value = '';
+            document.getElementById('componentManufacturer').value = '';
+            document.getElementById('componentDatasheet').value = '';
+            document.getElementById('componentPinout').value = '';
+            document.getElementById('componentSpecs').value = '';
+            document.getElementById('componentPrice').value = '';
+            document.getElementById('componentQuantity').value = '0';
+            document.getElementById('componentTags').value = '';
+            document.getElementById('componentNotes').value = '';
+            document.getElementById('componentForm').style.display = 'block';
+        }
+
+        function cancelComponentForm() {
+            document.getElementById('componentForm').style.display = 'none';
+        }
+
+        function saveComponent() {
+            const name = document.getElementById('componentName').value.trim();
+            if (!name) return alert('Component name required');
+            const tags = document.getElementById('componentTags').value.split(',').map(t => t.trim()).filter(t => t);
+            const componentData = {
+                name: name,
+                category: document.getElementById('componentCategory').value.trim(),
+                description: document.getElementById('componentDesc').value.trim(),
+                manufacturer: document.getElementById('componentManufacturer').value.trim(),
+                datasheet: document.getElementById('componentDatasheet').value.trim(),
+                pinout: document.getElementById('componentPinout').value.trim(),
+                specifications: document.getElementById('componentSpecs').value.trim(),
+                price: document.getElementById('componentPrice').value.trim(),
+                quantity: document.getElementById('componentQuantity').value.trim(),
+                tags: tags,
+                notes: document.getElementById('componentNotes').value.trim()
+            };
+            if (editingComponentKey) {
+                componentsRef.child(editingComponentKey).update(componentData)
+                    .then(cancelComponentForm);
+            } else {
+                componentsRef.push(componentData)
+                    .then(cancelComponentForm);
+            }
+        }
+
+        function deleteComponent(key) {
+            if (confirm('Delete this component?')) {
+                componentsRef.child(key).remove();
+            }
+        }
+
+        function editComponent(key) {
+            const c = components.find(c => c.firebaseKey === key);
+            if (!c) return;
+            editingComponentKey = key;
+            document.getElementById('componentFormTitle').innerText = 'Edit Component';
+            document.getElementById('componentName').value = c.name || '';
+            document.getElementById('componentCategory').value = c.category || '';
+            document.getElementById('componentDesc').value = c.description || '';
+            document.getElementById('componentManufacturer').value = c.manufacturer || '';
+            document.getElementById('componentDatasheet').value = c.datasheet || '';
+            document.getElementById('componentPinout').value = c.pinout || '';
+            document.getElementById('componentSpecs').value = c.specifications || '';
+            document.getElementById('componentPrice').value = c.price || '';
+            document.getElementById('componentQuantity').value = c.quantity || '0';
+            document.getElementById('componentTags').value = (c.tags || []).join(', ');
+            document.getElementById('componentNotes').value = c.notes || '';
+            document.getElementById('componentForm').style.display = 'block';
+        }
+
+        // ---------- CIRCUITS ----------
+        let circuits = [];
+        let editingCircuitKey = null;
+
+        function loadCircuits() {
+            circuitsRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                circuits = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
+                renderCircuitsList();
+            });
+        }
+
+        function renderCircuitsList() {
+            const list = document.getElementById('circuitsList');
+            if (circuits.length === 0) {
+                list.innerHTML = '<p style="color:#666; text-align:center;">No circuits yet. Add one!</p>';
+                return;
+            }
+            list.innerHTML = circuits.map(c => `
+                <div class="circuit-card">
+                    <div class="circuit-img">${c.image ? `<img src="${c.image}" alt="${c.name}">` : '<i class="fas fa-microchip"></i>'}</div>
+                    <div class="circuit-info">
+                        <h4>${c.name}</h4>
+                        <p>${(c.description || '').substring(0,80)}...</p>
+                        <div class="circuit-tags">${(c.componentsUsed || []).slice(0,3).map(t => `<span>${t.name || t}</span>`).join('')}</div>
+                        <div class="circuit-actions">
+                            <button class="delete-btn" onclick="editCircuit('${c.firebaseKey}')"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="delete-btn" onclick="deleteCircuit('${c.firebaseKey}')"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showAddCircuitForm() {
+            editingCircuitKey = null;
+            document.getElementById('circuitFormTitle').innerText = 'Add New Circuit';
+            document.getElementById('circuitName').value = '';
+            document.getElementById('circuitDesc').value = '';
+            document.getElementById('circuitImage').value = '';
+            document.getElementById('circuitPdf').value = '';
+            document.getElementById('circuitCode').value = '';
+            document.getElementById('circuitDifficulty').value = '';
+            document.getElementById('circuitComponentsContainer').innerHTML = '';
+            document.getElementById('circuitNotes').value = '';
+            document.getElementById('circuitForm').style.display = 'block';
+        }
+
+        function cancelCircuitForm() {
+            document.getElementById('circuitForm').style.display = 'none';
+        }
+
+        function addCircuitComponent() {
+            const div = document.createElement('div'); div.className = 'array-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Component name" class="comp-name">
+                <input type="text" placeholder="Quantity" class="comp-qty" value="1">
+                <i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i>
+            `;
+            document.getElementById('circuitComponentsContainer').appendChild(div);
+        }
+
+        function saveCircuit() {
+            const name = document.getElementById('circuitName').value.trim();
+            if (!name) return alert('Circuit name required');
+            
+            const componentsUsed = [];
+            document.querySelectorAll('#circuitComponentsContainer .array-item').forEach(item => {
+                const compName = item.querySelector('.comp-name')?.value.trim();
+                const qty = item.querySelector('.comp-qty')?.value.trim();
+                if (compName) {
+                    componentsUsed.push({ name: compName, quantity: qty || '1' });
+                }
+            });
+
+            const circuitData = {
+                name: name,
+                description: document.getElementById('circuitDesc').value.trim(),
+                image: document.getElementById('circuitImage').value.trim(),
+                pdf: document.getElementById('circuitPdf').value.trim(),
+                code: document.getElementById('circuitCode').value.trim(),
+                difficulty: document.getElementById('circuitDifficulty').value,
+                componentsUsed: componentsUsed,
+                notes: document.getElementById('circuitNotes').value.trim()
+            };
+            if (editingCircuitKey) {
+                circuitsRef.child(editingCircuitKey).update(circuitData)
+                    .then(cancelCircuitForm);
+            } else {
+                circuitsRef.push(circuitData)
+                    .then(cancelCircuitForm);
+            }
+        }
+
+        function deleteCircuit(key) {
+            if (confirm('Delete this circuit?')) {
+                circuitsRef.child(key).remove();
+            }
+        }
+
+        function editCircuit(key) {
+            const c = circuits.find(c => c.firebaseKey === key);
+            if (!c) return;
+            editingCircuitKey = key;
+            document.getElementById('circuitFormTitle').innerText = 'Edit Circuit';
+            document.getElementById('circuitName').value = c.name || '';
+            document.getElementById('circuitDesc').value = c.description || '';
+            document.getElementById('circuitImage').value = c.image || '';
+            document.getElementById('circuitPdf').value = c.pdf || '';
+            document.getElementById('circuitCode').value = c.code || '';
+            document.getElementById('circuitDifficulty').value = c.difficulty || '';
+            document.getElementById('circuitNotes').value = c.notes || '';
+
+            const container = document.getElementById('circuitComponentsContainer');
+            container.innerHTML = '';
+            (c.componentsUsed || []).forEach(comp => {
+                const div = document.createElement('div'); div.className = 'array-item';
+                div.innerHTML = `
+                    <input type="text" placeholder="Component name" class="comp-name" value="${comp.name || ''}">
+                    <input type="text" placeholder="Quantity" class="comp-qty" value="${comp.quantity || '1'}">
+                    <i class="fas fa-times remove-item" onclick="this.parentElement.remove()"></i>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('circuitForm').style.display = 'block';
+        }
+
+        // ---------- TAB SWITCHING ----------
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+            if (tab === 'projects') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('projectsPanel').classList.add('active');
+            } else if (tab === 'skills') {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('skillsPanel').classList.add('active');
+                loadSkills(); // refresh data when tab is opened
+            } else if (tab === 'messages') {
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('messagesPanel').classList.add('active');
+            } else if (tab === 'profile') {
+                document.querySelectorAll('.tab')[3].classList.add('active');
+                document.getElementById('profilePanel').classList.add('active');
+            } else if (tab === 'settings') {
+                document.querySelectorAll('.tab')[4].classList.add('active');
+                document.getElementById('settingsPanel').classList.add('active');
+            } else if (tab === 'components') {
+                document.querySelectorAll('.tab')[5].classList.add('active');
+                document.getElementById('componentsPanel').classList.add('active');
+                loadComponents();
+            } else if (tab === 'circuits') {
+                document.querySelectorAll('.tab')[6].classList.add('active');
+                document.getElementById('circuitsPanel').classList.add('active');
+                loadCircuits();
+            }
+        }
+
+        function loadDashboardData() {
+            loadProjects();
+            loadSkills();
+            loadComponents();
+            loadCircuits();
+            document.getElementById('totalMessages').innerText = '0';
+            document.getElementById('totalVisitors').innerText = '0';
+        }
+
+        function saveProfile() { alert('Profile saved (demo)'); }
+        function changePassword() { alert('Password changed (demo)'); }
     </script>
 </body>
 </html>
