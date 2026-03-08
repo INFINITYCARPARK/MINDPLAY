@@ -7,7 +7,25 @@
     <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8a1nVXO7HCFl7e4OTSP4UwZAu6kblnHM",
+            authDomain: "mindplayx.firebaseapp.com",
+            databaseURL: "https://mindplayx-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mindplayx",
+            storageBucket: "mindplayx.firebasestorage.app",
+            messagingSenderId: "414997999389",
+            appId: "1:414997999389:web:c998a27c82afc1f65e7bf4",
+            measurementId: "G-44CYEMLRP1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+    </script>
     <style>
+        /* (all your existing CSS – unchanged) */
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family:'Inter',sans-serif;
@@ -34,7 +52,6 @@
         ::-webkit-scrollbar-track { background:#1a1a1a; }
         ::-webkit-scrollbar-thumb { background:#444; border-radius:10px; }
         ::-webkit-scrollbar-thumb:hover { background:#666; }
-
         .container { max-width:1300px; margin:0 auto; padding:0 5%; }
         section {
             padding:var(--spacing-lg) 0;
@@ -57,7 +74,6 @@
             border-bottom:1px solid var(--border-dim);
             padding-bottom:0.5rem;
         }
-
         .navbar {
             position:fixed;
             top:0;
@@ -97,7 +113,6 @@
         .nav-links a:hover { color:var(--text-light); }
         .nav-links a:hover::after { width:100%; }
         .menu-toggle { display:none; font-size:1.8rem; color:var(--text-light); cursor:pointer; }
-
         .hero {
             min-height:100vh;
             display:flex;
@@ -160,7 +175,6 @@
         .hero-graphic { flex:1 1 300px; display:flex; justify-content:center; align-items:center; }
         .robot-icon { font-size:15rem; color:#222; transition:var(--transition); }
         .robot-icon:hover { color:#444; }
-
         .search-container {
             max-width:600px;
             margin:0 auto 2rem;
@@ -176,7 +190,6 @@
             transition:var(--transition);
         }
         .search-input:focus { outline:none; border-color:#666; background:#111; }
-
         .projects-grid {
             display:grid;
             grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
@@ -255,7 +268,6 @@
             padding:3rem;
             grid-column:1/-1;
         }
-
         .skills-container {
             display:flex;
             flex-wrap:wrap;
@@ -288,7 +300,6 @@
         .skill-circle i { font-size:3rem; color:#666; transition:var(--transition); }
         .skill-item:hover .skill-circle i { color:#fff; }
         .skill-item span { font-weight:500; color:#aaa; text-align:center; font-size:1rem; }
-
         .contact-container {
             display:flex;
             flex-wrap:wrap;
@@ -348,7 +359,6 @@
             min-height:2rem;
             color:#aaa;
         }
-
         footer {
             text-align:center;
             padding:2rem 5%;
@@ -356,7 +366,6 @@
             color:#666;
             font-size:0.95rem;
         }
-
         @media (max-width:768px) {
             .navbar { padding:0.8rem 5%; }
             .nav-links {
@@ -432,14 +441,7 @@
 
     <section id="skills">
         <h2 class="section-title">Skills & Tools</h2>
-        <div class="skills-container">
-            <div class="skill-item"><div class="skill-circle"><i class="fab fa-arduino"></i></div><span>Arduino</span></div>
-            <div class="skill-item"><div class="skill-circle"><i class="fab fa-python"></i></div><span>Python</span></div>
-            <div class="skill-item"><div class="skill-circle"><i class="fas fa-microchip"></i></div><span>C++</span></div>
-            <div class="skill-item"><div class="skill-circle"><i class="fas fa-robot"></i></div><span>Robotics</span></div>
-            <div class="skill-item"><div class="skill-circle"><i class="fas fa-code-branch"></i></div><span>Git</span></div>
-            <div class="skill-item"><div class="skill-circle"><i class="fas fa-database"></i></div><span>IoT</span></div>
-        </div>
+        <div class="skills-container" id="skillsContainer"></div>
     </section>
 
     <section id="contact">
@@ -495,26 +497,52 @@
             });
         });
 
-        function loadProjects() {
-            const stored = localStorage.getItem('mindplay_projects');
-            return stored ? JSON.parse(stored) : [];
+        // ---------- FIREBASE DATA LOADING ----------
+        let projects = [];
+        let skills = [];
+        let currentFilter = '';
+
+        // Load projects (real‑time)
+        db.ref('projects').on('value', (snapshot) => {
+            const data = snapshot.val();
+            projects = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
+            displayProjects();
+        });
+
+        // Load skills (real‑time)
+        db.ref('skills').on('value', (snapshot) => {
+            const data = snapshot.val();
+            skills = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
+            renderSkills();
+        });
+
+        function renderSkills() {
+            const container = document.getElementById('skillsContainer');
+            if (skills.length === 0) {
+                container.innerHTML = '<p style="color:#666; text-align:center;">No skills added yet.</p>';
+                return;
+            }
+            container.innerHTML = skills.map(s => `
+                <div class="skill-item">
+                    <div class="skill-circle"><i class="${s.icon}"></i></div>
+                    <span>${s.name}</span>
+                </div>
+            `).join('');
         }
 
-        let projects = loadProjects();
-
-        function displayProjects(filter = '') {
+        function displayProjects() {
             const grid = document.getElementById('projectsGrid');
             const filtered = projects.filter(p => 
-                p.title.toLowerCase().includes(filter.toLowerCase()) ||
-                p.description.toLowerCase().includes(filter.toLowerCase()) ||
-                (p.tech && p.tech.some(t => t.toLowerCase().includes(filter.toLowerCase())))
+                p.title.toLowerCase().includes(currentFilter.toLowerCase()) ||
+                p.description.toLowerCase().includes(currentFilter.toLowerCase()) ||
+                (p.tech && p.tech.some(t => t.toLowerCase().includes(currentFilter.toLowerCase())))
             );
             if (filtered.length === 0) {
                 grid.innerHTML = '<div class="no-projects">🔍 No projects found.</div>';
                 return;
             }
             grid.innerHTML = filtered.map(p => `
-                <div class="project-card" data-id="${p.id}">
+                <div class="project-card" data-id="${p.firebaseKey}">
                     <div class="project-img"><i class="fas ${p.icon || 'fa-robot'}"></i></div>
                     <div class="project-info">
                         <h3>${p.title}</h3>
@@ -530,12 +558,12 @@
             });
         }
 
-        displayProjects();
-
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            displayProjects(e.target.value);
+            currentFilter = e.target.value;
+            displayProjects();
         });
 
+        // ---------- NAVBAR, TYPED, INTERSECTION (unchanged) ----------
         window.addEventListener('scroll', () => {
             document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
         });
