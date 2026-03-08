@@ -3,31 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindPlay Admin • Secure</title>
+    <title>MindPlay Admin • Working</title>
     <meta name="robots" content="noindex, nofollow">
+    <!-- Font Awesome & Google Fonts (always load) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Firebase SDK (Auth + Database) -->
+    <!-- Firebase SDK (must come before our script) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyB8a1nVXO7HCFl7e4OTSP4UwZAu6kblnHM",
-            authDomain: "mindplayx.firebaseapp.com",
-            databaseURL: "https://mindplayx-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "mindplayx",
-            storageBucket: "mindplayx.firebasestorage.app",
-            messagingSenderId: "414997999389",
-            appId: "1:414997999389:web:c998a27c82afc1f65e7bf4",
-            measurementId: "G-44CYEMLRP1"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.database();
-    </script>
     <style>
-        /* ---------- PURE BLACK THEME ---------- */
+        /* ---------- PURE BLACK THEME (unchanged) ---------- */
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
         body { background:#000; color:#fff; line-height:1.6; min-height:100vh; }
         :root {
@@ -48,6 +34,7 @@
             --transition:all 0.3s ease;
         }
 
+        /* Login Overlay */
         .login-overlay {
             position:fixed; top:0; left:0; width:100%; height:100%;
             background:rgba(0,0,0,0.95); backdrop-filter:blur(10px); z-index:9999;
@@ -72,7 +59,7 @@
         .login-box input:focus { outline:none; border-color:#fff; background:#222; }
         .checkbox-container {
             display:flex; align-items:center; gap:0.5rem; margin:1rem 0;
-            color:var(--text-dim); font-size:var(--font-size-base); flex-wrap:wrap;
+            color:var(--text-dim); flex-wrap:wrap;
         }
         .checkbox-container input { width:auto; accent-color:#fff; }
         .login-btn {
@@ -81,11 +68,11 @@
             transition:var(--transition); margin-top:0.5rem; font-size:1.1rem;
         }
         .login-btn:hover { background:#fff; color:#000; border-color:#fff; }
-        .login-btn:disabled { opacity:0.4; cursor:not-allowed; border-color:#444; }
         .error-msg { color:#cc3333; text-align:center; margin:0.5rem 0; min-height:2rem; font-size:0.9rem; }
         .security-note { font-size:0.7rem; color:#666; text-align:center; margin-top:1rem; }
         .security-note i { margin-right:0.3rem; }
 
+        /* Admin Panel (hidden until login) */
         .admin-panel { display:none; }
         .admin-header {
             background:#0a0a0a; padding:var(--spacing-sm) 5%; border-bottom:1px solid #333;
@@ -158,24 +145,24 @@
         }
         .add-item:hover { background:#333; }
 
-        .projects-list {
+        .projects-list, .components-grid, .circuits-grid {
             display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
             gap:var(--spacing-md); margin-top:var(--spacing-md);
         }
-        .project-admin-card {
+        .project-admin-card, .component-card, .circuit-card {
             background:#111; border-radius:15px; overflow:hidden; border:1px solid #333;
             transition:var(--transition); display:flex; flex-direction:column;
         }
-        .project-admin-card:hover { border-color:#cc3333; transform:translateY(-3px); }
-        .project-admin-img { height:150px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        .project-admin-img img { width:100%; height:100%; object-fit:cover; }
-        .project-admin-img i { font-size:3rem; color:#666; }
-        .project-admin-info { padding:1rem; flex:1; }
-        .project-admin-info h4 { color:#fff; margin-bottom:0.3rem; font-size:1.1rem; word-wrap:break-word; }
-        .project-admin-info p { color:#aaa; font-size:0.85rem; margin-bottom:0.5rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-        .project-admin-tags { display:flex; flex-wrap:wrap; gap:0.3rem; margin:0.5rem 0; }
-        .project-admin-tags span { background:#1a1a1a; border:1px solid #444; color:#ccc; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem; }
-        .project-admin-actions { display:flex; gap:0.5rem; margin-top:0.8rem; }
+        .project-admin-card:hover, .component-card:hover, .circuit-card:hover { border-color:#cc3333; transform:translateY(-3px); }
+        .project-admin-img, .component-img, .circuit-img { height:150px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        .project-admin-img img, .component-img img, .circuit-img img { width:100%; height:100%; object-fit:cover; }
+        .project-admin-img i, .component-img i, .circuit-img i { font-size:3rem; color:#666; }
+        .project-admin-info, .component-info, .circuit-info { padding:1rem; flex:1; }
+        .project-admin-info h4, .component-info h4, .circuit-info h4 { color:#fff; margin-bottom:0.3rem; font-size:1.1rem; word-wrap:break-word; }
+        .project-admin-info p, .component-info p, .circuit-info p { color:#aaa; font-size:0.85rem; margin-bottom:0.5rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .project-admin-tags, .component-tags, .circuit-tags { display:flex; flex-wrap:wrap; gap:0.3rem; margin:0.5rem 0; }
+        .project-admin-tags span, .component-tags span, .circuit-tags span { background:#1a1a1a; border:1px solid #444; color:#ccc; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem; }
+        .project-admin-actions, .component-actions, .circuit-actions { display:flex; gap:0.5rem; margin-top:0.8rem; }
         .delete-btn {
             flex:1; padding:0.5rem; background:transparent; border:1px solid #992222;
             color:#cc3333; border-radius:5px; cursor:pointer; transition:var(--transition); font-size:0.9rem;
@@ -208,25 +195,6 @@
             border-radius:10px; font-weight:600; cursor:pointer; transition:var(--transition);
         }
         .add-skill button:hover { background:#fff; color:#000; border-color:#fff; }
-
-        .components-grid, .circuits-grid {
-            display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
-            gap:var(--spacing-md); margin-top:var(--spacing-md);
-        }
-        .component-card, .circuit-card {
-            background:#111; border-radius:15px; overflow:hidden; border:1px solid #333;
-            transition:var(--transition); display:flex; flex-direction:column;
-        }
-        .component-card:hover, .circuit-card:hover { border-color:#cc3333; transform:translateY(-3px); }
-        .component-img, .circuit-img { height:150px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        .component-img img, .circuit-img img { width:100%; height:100%; object-fit:cover; }
-        .component-img i, .circuit-img i { font-size:3rem; color:#666; }
-        .component-info, .circuit-info { padding:1rem; flex:1; }
-        .component-info h4, .circuit-info h4 { color:#fff; margin-bottom:0.3rem; font-size:1.1rem; }
-        .component-info p, .circuit-info p { color:#aaa; font-size:0.85rem; margin-bottom:0.5rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-        .component-tags, .circuit-tags { display:flex; flex-wrap:wrap; gap:0.3rem; margin:0.5rem 0; }
-        .component-tags span, .circuit-tags span { background:#1a1a1a; border:1px solid #444; color:#ccc; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem; }
-        .component-actions, .circuit-actions { display:flex; gap:0.5rem; margin-top:0.8rem; }
 
         .profile-settings { max-width:600px; }
         .profile-preview {
@@ -454,13 +422,36 @@
         </div>
 
         <footer class="admin-footer">
-            <p>© 2025 MindPlay Admin • Secure Firebase</p>
+            <p>© 2025 MindPlay Admin • Working Version</p>
         </footer>
     </div>
 
     <script>
-        // ---------- AUTH STATE ----------
+        // ---------- FIREBASE INIT (with your config) ----------
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8a1nVXO7HCFl7e4OTSP4UwZAu6kblnHM",
+            authDomain: "mindplayx.firebaseapp.com",
+            databaseURL: "https://mindplayx-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mindplayx",
+            storageBucket: "mindplayx.firebasestorage.app",
+            messagingSenderId: "414997999389",
+            appId: "1:414997999389:web:c998a27c82afc1f65e7bf4",
+            measurementId: "G-44CYEMLRP1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // ---------- GLOBAL ERROR HANDLER (to catch any JS errors) ----------
+        window.onerror = function(msg, url, line) {
+            console.error("Global error: " + msg + " at line " + line);
+            alert("An error occurred. Check console (F12) for details.");
+            return true;
+        };
+
+        // ---------- AUTH STATE (with debugging) ----------
         auth.onAuthStateChanged(user => {
+            console.log("Auth state changed. User:", user ? user.email : "null");
             if (user) {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
@@ -472,6 +463,7 @@
             }
         });
 
+        // ---------- LOGIN FUNCTION ----------
         function login() {
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passwordInput').value;
@@ -512,22 +504,26 @@
                 projects = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
                 renderProjectsList();
                 document.getElementById('totalProjects').innerText = projects.length;
+            }, (error) => {
+                console.error("Projects listener error:", error);
+                alert("Failed to load projects: " + error.message);
             });
         }
 
         function renderProjectsList() {
             const list = document.getElementById('projectsList');
+            if (!list) return;
             if (projects.length === 0) {
                 list.innerHTML = '<p style="color:#666; text-align:center;">No projects yet. Add one!</p>';
                 return;
             }
             list.innerHTML = projects.map(p => `
                 <div class="project-admin-card">
-                    <div class="project-admin-img"><i class="fas ${p.icon}"></i></div>
+                    <div class="project-admin-img"><i class="fas ${p.icon || 'fa-robot'}"></i></div>
                     <div class="project-admin-info">
-                        <h4>${p.title}</h4>
-                        <p>${(p.description || '').substring(0,80)}...</p>
-                        <div class="project-admin-tags">${(p.tech || []).slice(0,3).map(t => `<span>${t}</span>`).join('')}</div>
+                        <h4>${escapeHtml(p.title)}</h4>
+                        <p>${escapeHtml((p.description || '').substring(0,80))}...</p>
+                        <div class="project-admin-tags">${(p.tech || []).slice(0,3).map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>
                         <div class="project-admin-actions">
                             <button class="delete-btn" onclick="editProject('${p.firebaseKey}')"><i class="fas fa-edit"></i> Edit</button>
                             <button class="delete-btn" onclick="deleteProject('${p.firebaseKey}')"><i class="fas fa-trash"></i> Delete</button>
@@ -535,6 +531,18 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Simple escape to prevent XSS
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.replace(/[&<>"]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                return m;
+            });
         }
 
         function showAddProjectForm() {
@@ -592,18 +600,18 @@
             if (editingId) {
                 projectsRef.child(editingId).update(projectData)
                     .then(() => cancelProjectForm())
-                    .catch(err => alert('Error updating: ' + err));
+                    .catch(err => alert('Error updating: ' + err.message));
             } else {
                 projectsRef.push(projectData)
                     .then(() => cancelProjectForm())
-                    .catch(err => alert('Error saving: ' + err));
+                    .catch(err => alert('Error saving: ' + err.message));
             }
         }
 
         function deleteProject(key) {
             if (confirm('Delete this project?')) {
                 projectsRef.child(key).remove()
-                    .catch(err => alert('Error deleting: ' + err));
+                    .catch(err => alert('Error deleting: ' + err.message));
             }
         }
 
@@ -660,7 +668,7 @@
 
         function deleteAllProjects() {
             if (confirm('⚠️ Delete ALL projects? This cannot be undone.')) {
-                projectsRef.remove().catch(err => alert(err));
+                projectsRef.remove().catch(err => alert(err.message));
             }
         }
 
@@ -672,14 +680,17 @@
                 skills = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
                 renderSkills();
                 document.getElementById('totalSkills').innerText = skills.length;
+            }, (error) => {
+                console.error("Skills listener error:", error);
             });
         }
 
         function renderSkills() {
             const grid = document.getElementById('skillsGrid');
+            if (!grid) return;
             grid.innerHTML = skills.map(s => `
                 <div class="skill-admin-card">
-                    <i class="${s.icon}"></i><span>${s.name}</span>
+                    <i class="${s.icon}"></i><span>${escapeHtml(s.name)}</span>
                     <i class="fas fa-times delete-skill" onclick="deleteSkill('${s.firebaseKey}')"></i>
                 </div>
             `).join('');
@@ -700,6 +711,8 @@
                         document.getElementById('newSkillName').value = '';
                         document.getElementById('newSkillIcon').value = '';
                     });
+            } else {
+                alert("Both name and icon are required");
             }
         }
 
@@ -712,11 +725,14 @@
                 const data = snapshot.val();
                 components = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
                 renderComponentsList();
+            }, (error) => {
+                console.error("Components listener error:", error);
             });
         }
 
         function renderComponentsList() {
             const list = document.getElementById('componentsList');
+            if (!list) return;
             if (components.length === 0) {
                 list.innerHTML = '<p style="color:#666; text-align:center;">No components yet. Add one!</p>';
                 return;
@@ -725,9 +741,9 @@
                 <div class="component-card">
                     <div class="component-img">${c.image ? `<img src="${c.image}" alt="${c.name}">` : '<i class="fas fa-microchip"></i>'}</div>
                     <div class="component-info">
-                        <h4>${c.name}</h4>
-                        <p>${(c.description || '').substring(0,80)}...</p>
-                        <div class="component-tags">${(c.tags || []).slice(0,3).map(t => `<span>${t}</span>`).join('')}</div>
+                        <h4>${escapeHtml(c.name)}</h4>
+                        <p>${escapeHtml((c.description || '').substring(0,80))}...</p>
+                        <div class="component-tags">${(c.tags || []).slice(0,3).map(t => `<span>${escapeHtml(t)}</span>`).join('')}</div>
                         <div class="component-actions">
                             <button class="delete-btn" onclick="editComponent('${c.firebaseKey}')"><i class="fas fa-edit"></i> Edit</button>
                             <button class="delete-btn" onclick="deleteComponent('${c.firebaseKey}')"><i class="fas fa-trash"></i> Delete</button>
@@ -777,16 +793,19 @@
             };
             if (editingComponentKey) {
                 componentsRef.child(editingComponentKey).update(componentData)
-                    .then(cancelComponentForm);
+                    .then(cancelComponentForm)
+                    .catch(err => alert('Error updating: ' + err.message));
             } else {
                 componentsRef.push(componentData)
-                    .then(cancelComponentForm);
+                    .then(cancelComponentForm)
+                    .catch(err => alert('Error saving: ' + err.message));
             }
         }
 
         function deleteComponent(key) {
             if (confirm('Delete this component?')) {
-                componentsRef.child(key).remove();
+                componentsRef.child(key).remove()
+                    .catch(err => alert(err.message));
             }
         }
 
@@ -818,11 +837,14 @@
                 const data = snapshot.val();
                 circuits = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
                 renderCircuitsList();
+            }, (error) => {
+                console.error("Circuits listener error:", error);
             });
         }
 
         function renderCircuitsList() {
             const list = document.getElementById('circuitsList');
+            if (!list) return;
             if (circuits.length === 0) {
                 list.innerHTML = '<p style="color:#666; text-align:center;">No circuits yet. Add one!</p>';
                 return;
@@ -831,9 +853,9 @@
                 <div class="circuit-card">
                     <div class="circuit-img">${c.image ? `<img src="${c.image}" alt="${c.name}">` : '<i class="fas fa-microchip"></i>'}</div>
                     <div class="circuit-info">
-                        <h4>${c.name}</h4>
-                        <p>${(c.description || '').substring(0,80)}...</p>
-                        <div class="circuit-tags">${(c.componentsUsed || []).slice(0,3).map(t => `<span>${t.name || t}</span>`).join('')}</div>
+                        <h4>${escapeHtml(c.name)}</h4>
+                        <p>${escapeHtml((c.description || '').substring(0,80))}...</p>
+                        <div class="circuit-tags">${(c.componentsUsed || []).slice(0,3).map(t => `<span>${escapeHtml(t.name || t)}</span>`).join('')}</div>
                         <div class="circuit-actions">
                             <button class="delete-btn" onclick="editCircuit('${c.firebaseKey}')"><i class="fas fa-edit"></i> Edit</button>
                             <button class="delete-btn" onclick="deleteCircuit('${c.firebaseKey}')"><i class="fas fa-trash"></i> Delete</button>
@@ -896,16 +918,19 @@
             };
             if (editingCircuitKey) {
                 circuitsRef.child(editingCircuitKey).update(circuitData)
-                    .then(cancelCircuitForm);
+                    .then(cancelCircuitForm)
+                    .catch(err => alert('Error updating: ' + err.message));
             } else {
                 circuitsRef.push(circuitData)
-                    .then(cancelCircuitForm);
+                    .then(cancelCircuitForm)
+                    .catch(err => alert('Error saving: ' + err.message));
             }
         }
 
         function deleteCircuit(key) {
             if (confirm('Delete this circuit?')) {
-                circuitsRef.child(key).remove();
+                circuitsRef.child(key).remove()
+                    .catch(err => alert(err.message));
             }
         }
 
@@ -969,6 +994,7 @@
         }
 
         function loadDashboardData() {
+            console.log("Loading dashboard data...");
             loadProjects();
             loadSkills();
             loadComponents();
@@ -977,6 +1003,7 @@
             document.getElementById('totalVisitors').innerText = '0';
         }
 
+        // Placeholder functions
         function saveProfile() { alert('Profile saved (demo)'); }
         function changePassword() { alert('Password changed (demo)'); }
     </script>
