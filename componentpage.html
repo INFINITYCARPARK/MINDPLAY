@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pa-in">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindPlay • Component Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Inter',sans-serif;
+            background:#000;
+            color:#e0e0e0;
+            line-height:1.6;
+        }
+        :root {
+            --bg-dark:#0a0a0a;
+            --bg-card:#111;
+            --border-dim:#333;
+            --text-light:#fff;
+            --text-dim:#aaa;
+            --border-radius:20px;
+        }
+        .container { max-width:1200px; margin:0 auto; padding:2rem 5%; }
+        .back-link {
+            display:inline-block;
+            margin-bottom:2rem;
+            color:#aaa;
+            text-decoration:none;
+            border:1px solid #333;
+            padding:0.5rem 1.5rem;
+            border-radius:60px;
+            transition:0.3s;
+        }
+        .back-link:hover { border-color:#fff; color:#fff; }
+        .component-header { text-align:center; margin-bottom:3rem; }
+        .component-header h1 { font-size:3rem; color:#fff; margin-bottom:0.5rem; }
+        .component-category { color:#666; font-size:1.1rem; text-transform:uppercase; }
+        .component-images {
+            display:flex; flex-wrap:wrap; gap:2rem; justify-content:center; margin:2rem 0;
+        }
+        .main-image {
+            flex:1 1 300px; max-width:400px;
+        }
+        .main-image img { width:100%; border-radius:10px; border:1px solid #333; }
+        .pinout-image {
+            flex:1 1 300px; max-width:400px;
+        }
+        .pinout-image img { width:100%; border-radius:10px; border:1px solid #333; }
+        .section-title {
+            font-size:2rem;
+            font-weight:600;
+            margin:2rem 0 1rem;
+            color:#fff;
+            border-bottom:1px solid #333;
+            padding-bottom:0.5rem;
+        }
+        .info-grid {
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
+            gap:1.5rem;
+            background:#0a0a0a;
+            padding:2rem;
+            border-radius:var(--border-radius);
+            border:1px solid #333;
+        }
+        .info-item {
+            display:flex;
+            flex-direction:column;
+            gap:0.3rem;
+        }
+        .info-label {
+            color:#666;
+            font-size:0.9rem;
+            text-transform:uppercase;
+        }
+        .info-value {
+            color:#fff;
+            font-size:1.1rem;
+            word-break:break-word;
+        }
+        .info-value a { color:#aaa; text-decoration:none; }
+        .info-value a:hover { color:#fff; }
+        .description {
+            background:#0a0a0a;
+            padding:2rem;
+            border-radius:var(--border-radius);
+            border:1px solid #333;
+            line-height:1.8;
+        }
+        .tags {
+            display:flex;
+            flex-wrap:wrap;
+            gap:0.8rem;
+            margin:1rem 0;
+        }
+        .tags span {
+            background:#111;
+            border:1px solid #444;
+            color:#ccc;
+            padding:0.3rem 1rem;
+            border-radius:60px;
+            font-size:0.9rem;
+        }
+        .not-found { text-align:center; color:#cc3333; font-size:1.5rem; margin-top:4rem; }
+        footer { text-align:center; padding:2rem 5%; border-top:1px solid #222; color:#666; margin-top:3rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="component.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Components</a>
+        <div id="component-details"></div>
+    </div>
+    <footer>
+        <p>© 2025 Tejinder Singh Gill • Component Details</p>
+    </footer>
+
+    <script>
+        function getComponentById(id) {
+            const components = JSON.parse(localStorage.getItem('mindplay_components')) || [];
+            return components.find(c => c.id === id);
+        }
+
+        function renderComponent() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const componentId = urlParams.get('id');
+            const container = document.getElementById('component-details');
+            if (!componentId) {
+                container.innerHTML = '<div class="not-found">No component specified.</div>';
+                return;
+            }
+            const component = getComponentById(componentId);
+            if (!component) {
+                container.innerHTML = '<div class="not-found">Component not found.</div>';
+                return;
+            }
+
+            const html = `
+                <div class="component-header">
+                    <h1>${component.name}</h1>
+                    ${component.category ? `<div class="component-category">${component.category}</div>` : ''}
+                </div>
+
+                ${component.image || component.pinout ? `
+                <div class="component-images">
+                    ${component.image ? `
+                        <div class="main-image">
+                            <img src="${component.image}" alt="${component.name}">
+                        </div>
+                    ` : ''}
+                    ${component.pinout ? `
+                        <div class="pinout-image">
+                            <img src="${component.pinout}" alt="Pinout diagram">
+                        </div>
+                    ` : ''}
+                </div>
+                ` : ''}
+
+                <div class="info-grid">
+                    ${component.manufacturer ? `
+                        <div class="info-item"><span class="info-label">Manufacturer</span><span class="info-value">${component.manufacturer}</span></div>
+                    ` : ''}
+                    ${component.price ? `
+                        <div class="info-item"><span class="info-label">Price</span><span class="info-value">${component.price}</span></div>
+                    ` : ''}
+                    ${component.quantity !== undefined ? `
+                        <div class="info-item"><span class="info-label">Quantity in stock</span><span class="info-value">${component.quantity}</span></div>
+                    ` : ''}
+                    ${component.datasheet ? `
+                        <div class="info-item"><span class="info-label">Datasheet</span><span class="info-value"><a href="${component.datasheet}" target="_blank"><i class="fas fa-file-pdf"></i> View</a></span></div>
+                    ` : ''}
+                </div>
+
+                <div class="section-title">Description</div>
+                <div class="description">${component.description || 'No description provided.'}</div>
+
+                ${component.specifications ? `
+                    <div class="section-title">Specifications</div>
+                    <div class="description">${component.specifications}</div>
+                ` : ''}
+
+                ${component.tags && component.tags.length ? `
+                    <div class="section-title">Tags</div>
+                    <div class="tags">${component.tags.map(t => `<span>${t}</span>`).join('')}</div>
+                ` : ''}
+
+                ${component.notes ? `
+                    <div class="section-title">Notes</div>
+                    <div class="description">${component.notes}</div>
+                ` : ''}
+            `;
+            container.innerHTML = html;
+        }
+
+        renderComponent();
+    </script>
+</body>
+</html>

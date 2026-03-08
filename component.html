@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pa-in">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindPlay • Components Library</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#000; color:#e0e0e0; line-height:1.6; }
+        :root {
+            --bg-dark:#0a0a0a;
+            --bg-card:#111;
+            --border-dim:#333;
+            --text-light:#fff;
+            --text-dim:#aaa;
+            --border-radius:20px;
+            --transition:all 0.3s ease;
+        }
+        .container { max-width:1300px; margin:0 auto; padding:2rem 5%; }
+        .back-link {
+            display:inline-block; margin-bottom:2rem; color:#aaa; text-decoration:none;
+            border:1px solid #333; padding:0.5rem 1.5rem; border-radius:60px; transition:0.3s;
+        }
+        .back-link:hover { border-color:#fff; color:#fff; }
+        h1 { font-size:2.5rem; color:#fff; margin-bottom:2rem; text-align:center; border-bottom:1px solid #333; padding-bottom:1rem; }
+        .search-container {
+            max-width:600px; margin:0 auto 2rem;
+        }
+        .search-input {
+            width:100%; padding:1rem 1.5rem; background:#0a0a0a; border:1px solid #333;
+            border-radius:60px; color:#fff; font-size:1rem; transition:var(--transition);
+        }
+        .search-input:focus { outline:none; border-color:#666; background:#111; }
+        .components-grid {
+            display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+            gap:2rem; margin-top:2rem;
+        }
+        .component-card {
+            background:#0a0a0a; border-radius:var(--border-radius); overflow:hidden;
+            border:1px solid #222; transition:var(--transition); display:flex; flex-direction:column;
+            cursor:pointer;
+        }
+        .component-card:hover { transform:translateY(-6px); border-color:#444; box-shadow:0 15px 30px rgba(0,0,0,0.8); }
+        .component-img {
+            height:180px; background:#111; display:flex; align-items:center; justify-content:center;
+        }
+        .component-img img { width:100%; height:100%; object-fit:cover; }
+        .component-img i { font-size:4rem; color:#333; }
+        .component-info { padding:1.5rem; flex:1; }
+        .component-info h3 { font-size:1.4rem; margin-bottom:0.5rem; color:#fff; }
+        .component-category {
+            color:#666; font-size:0.85rem; text-transform:uppercase; margin-bottom:0.5rem;
+        }
+        .component-description { color:#aaa; font-size:0.95rem; margin-bottom:0.8rem; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+        .component-tags { display:flex; flex-wrap:wrap; gap:0.5rem; margin:0.5rem 0; }
+        .component-tags span { background:#111; border:1px solid #333; color:#ccc; padding:0.2rem 0.8rem; border-radius:50px; font-size:0.75rem; }
+        .no-components { text-align:center; color:#666; font-size:1.2rem; padding:3rem; grid-column:1/-1; }
+        footer { text-align:center; padding:2rem 5%; border-top:1px solid #222; color:#666; margin-top:3rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Portfolio</a>
+        <h1><i class="fas fa-microchip"></i> Components Library</h1>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search components by name, category, tags...">
+        </div>
+        <div id="componentsGrid" class="components-grid"></div>
+    </div>
+    <footer>
+        <p>© 2025 Tejinder Singh Gill • Components Archive</p>
+    </footer>
+
+    <script>
+        function loadComponents() {
+            const stored = localStorage.getItem('mindplay_components');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function renderComponents(filter = '') {
+            const components = loadComponents();
+            const grid = document.getElementById('componentsGrid');
+            const filtered = components.filter(c => {
+                const searchStr = filter.toLowerCase();
+                return (c.name && c.name.toLowerCase().includes(searchStr)) ||
+                       (c.category && c.category.toLowerCase().includes(searchStr)) ||
+                       (c.description && c.description.toLowerCase().includes(searchStr)) ||
+                       (c.manufacturer && c.manufacturer.toLowerCase().includes(searchStr)) ||
+                       (c.tags && c.tags.some(t => t.toLowerCase().includes(searchStr)));
+            });
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="no-components">🔍 No components found.</div>';
+                return;
+            }
+            grid.innerHTML = filtered.map(c => `
+                <div class="component-card" data-id="${c.id}">
+                    <div class="component-img">
+                        ${c.image ? `<img src="${c.image}" alt="${c.name}">` : '<i class="fas fa-microchip"></i>'}
+                    </div>
+                    <div class="component-info">
+                        <h3>${c.name}</h3>
+                        ${c.category ? `<div class="component-category">${c.category}</div>` : ''}
+                        <div class="component-description">${c.description || 'No description'}</div>
+                        <div class="component-tags">${(c.tags || []).map(t => `<span>${t}</span>`).join('')}</div>
+                    </div>
+                </div>
+            `).join('');
+            document.querySelectorAll('.component-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    window.location.href = `componentpage.html?id=${card.dataset.id}`;
+                });
+            });
+        }
+
+        renderComponents();
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderComponents(e.target.value);
+        });
+    </script>
+</body>
+</html>
