@@ -6,6 +6,23 @@
     <title>MindPlay • Circuit Details</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8a1nVXO7HCFl7e4OTSP4UwZAu6kblnHM",
+            authDomain: "mindplayx.firebaseapp.com",
+            databaseURL: "https://mindplayx-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mindplayx",
+            storageBucket: "mindplayx.firebasestorage.app",
+            messagingSenderId: "414997999389",
+            appId: "1:414997999389:web:c998a27c82afc1f65e7bf4",
+            measurementId: "G-44CYEMLRP1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+    </script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
@@ -128,25 +145,25 @@
     </footer>
 
     <script>
-        function getCircuitById(id) {
-            const circuits = JSON.parse(localStorage.getItem('mindplay_circuits')) || [];
-            return circuits.find(c => c.id === id);
-        }
-
-        function renderCircuit() {
+        function loadCircuit() {
             const urlParams = new URLSearchParams(window.location.search);
-            const circuitId = urlParams.get('id');
+            const circuitKey = urlParams.get('id');
             const container = document.getElementById('circuit-details');
-            if (!circuitId) {
+            if (!circuitKey) {
                 container.innerHTML = '<div class="not-found">No circuit specified.</div>';
                 return;
             }
-            const circuit = getCircuitById(circuitId);
-            if (!circuit) {
-                container.innerHTML = '<div class="not-found">Circuit not found.</div>';
-                return;
-            }
+            db.ref('circuits/' + circuitKey).get().then((snapshot) => {
+                const circuit = snapshot.val();
+                if (!circuit) {
+                    container.innerHTML = '<div class="not-found">Circuit not found.</div>';
+                    return;
+                }
+                renderCircuit(circuit);
+            });
+        }
 
+        function renderCircuit(circuit) {
             const linksHtml = (circuit.pdf || circuit.code) ? `
                 <div class="links">
                     ${circuit.pdf ? `<a href="${circuit.pdf}" target="_blank"><i class="fas fa-file-pdf"></i> Schematic PDF</a>` : ''}
@@ -192,10 +209,10 @@
                 ${componentsHtml}
                 ${notesHtml}
             `;
-            container.innerHTML = html;
+            document.getElementById('circuit-details').innerHTML = html;
         }
 
-        renderCircuit();
+        loadCircuit();
     </script>
 </body>
 </html>
