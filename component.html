@@ -6,6 +6,23 @@
     <title>MindPlay • Components Library</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8a1nVXO7HCFl7e4OTSP4UwZAu6kblnHM",
+            authDomain: "mindplayx.firebaseapp.com",
+            databaseURL: "https://mindplayx-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mindplayx",
+            storageBucket: "mindplayx.firebasestorage.app",
+            messagingSenderId: "414997999389",
+            appId: "1:414997999389:web:c998a27c82afc1f65e7bf4",
+            measurementId: "G-44CYEMLRP1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+    </script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Inter',sans-serif; background:#000; color:#e0e0e0; line-height:1.6; }
@@ -74,28 +91,33 @@
     </footer>
 
     <script>
+        let components = [];
+        let currentFilter = '';
+
         function loadComponents() {
-            const stored = localStorage.getItem('mindplay_components');
-            return stored ? JSON.parse(stored) : [];
+            db.ref('components').on('value', (snapshot) => {
+                const data = snapshot.val();
+                components = data ? Object.keys(data).map(key => ({ firebaseKey: key, ...data[key] })) : [];
+                renderComponents();
+            });
         }
 
-        function renderComponents(filter = '') {
-            const components = loadComponents();
+        function renderComponents() {
             const grid = document.getElementById('componentsGrid');
             const filtered = components.filter(c => {
-                const searchStr = filter.toLowerCase();
-                return (c.name && c.name.toLowerCase().includes(searchStr)) ||
-                       (c.category && c.category.toLowerCase().includes(searchStr)) ||
-                       (c.description && c.description.toLowerCase().includes(searchStr)) ||
-                       (c.manufacturer && c.manufacturer.toLowerCase().includes(searchStr)) ||
-                       (c.tags && c.tags.some(t => t.toLowerCase().includes(searchStr)));
+                const search = currentFilter.toLowerCase();
+                return (c.name && c.name.toLowerCase().includes(search)) ||
+                       (c.category && c.category.toLowerCase().includes(search)) ||
+                       (c.description && c.description.toLowerCase().includes(search)) ||
+                       (c.manufacturer && c.manufacturer.toLowerCase().includes(search)) ||
+                       (c.tags && c.tags.some(t => t.toLowerCase().includes(search)));
             });
             if (filtered.length === 0) {
                 grid.innerHTML = '<div class="no-components">🔍 No components found.</div>';
                 return;
             }
             grid.innerHTML = filtered.map(c => `
-                <div class="component-card" data-id="${c.id}">
+                <div class="component-card" data-id="${c.firebaseKey}">
                     <div class="component-img">
                         ${c.image ? `<img src="${c.image}" alt="${c.name}">` : '<i class="fas fa-microchip"></i>'}
                     </div>
@@ -114,10 +136,12 @@
             });
         }
 
-        renderComponents();
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            renderComponents(e.target.value);
+            currentFilter = e.target.value;
+            renderComponents();
         });
+
+        loadComponents();
     </script>
 </body>
 </html>
